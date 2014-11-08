@@ -80,7 +80,7 @@ public class SessionFactoryTest {
         when(builder.getKnowledgePackages()).thenReturn(collection);
 
         RuleLoader loader = mock(RuleLoader.class);
-        when(loader.load(SessionFactory.USER_RULES)).thenReturn(builder);
+        when(loader.load(SessionFactory.MUSIC_RULES)).thenReturn(builder);
         when(sessionFactory.getRuleLoader()).thenReturn(loader);
 
         doCallRealMethod().when(sessionFactory).build();
@@ -88,7 +88,7 @@ public class SessionFactoryTest {
 
         verify(wrapper).newKnowledgeBase();
         verify(knowledgeBase).addKnowledgePackages(collection);
-        verify(loader).load(SessionFactory.USER_RULES);
+        verify(loader).load(SessionFactory.MUSIC_RULES);
         verify(builder).getKnowledgePackages();
         verify(result).setSession(session);
 

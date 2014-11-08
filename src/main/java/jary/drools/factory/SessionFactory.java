@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Factory to provide a populated rule session
- * see bean definition in spring.xml due to lack of annotation support for lookup-method
  *
  * @author <a href='mailto:jeremy.ary@gmail.com'>jary</a>
  */
@@ -34,7 +33,7 @@ public abstract class SessionFactory {
     /**
      * test-accessible user rule resource path
      */
-    public final static String USER_RULES = "drools/UserPatterns.drl";
+    public final static String MUSIC_RULES = "drools/MusicRules.drl";
 
     /**
      * build session from contructed object; ready to fire
@@ -45,7 +44,7 @@ public abstract class SessionFactory {
 
         KnowledgeBase knowledgeBase = getWrapper().newKnowledgeBase();
 
-        knowledgeBase.addKnowledgePackages(getRuleLoader().load(USER_RULES).getKnowledgePackages());
+        knowledgeBase.addKnowledgePackages(getRuleLoader().load(MUSIC_RULES).getKnowledgePackages());
         SessionMediator mediator = getSessionMediator();
         mediator.setSession(knowledgeBase.newStatefulKnowledgeSession());
 

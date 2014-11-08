@@ -7,9 +7,7 @@
     <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="locations">
             <list>
-                <value>classpath:twitter4j.properties</value>
-                <value>classpath:rabbit.properties</value>
-                <value>classpath:hazelcast.properties</value>
+                <value>classpath:props.properties</value>
             </list>
         </property>
     </bean>
