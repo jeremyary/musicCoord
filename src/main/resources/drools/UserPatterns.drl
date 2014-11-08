@@ -1,0 +1,14 @@
+package jary.drools
+
+import jary.drools.model.DanceEvent
+import jary.drools.model.SongAdjustEvent
+import jary.drools.model.SongAnalysisEvent
+
+global jary.drools.RuleDelegate delegate
+
+rule "dance input received"
+when
+    DanceEvent (  )
+then
+    delegate.handleTrend($user);
+end

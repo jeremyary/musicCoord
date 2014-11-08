@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit-1.1.xsd">
+
+    <import resource="classpath:spring-properties.xml" />
+
+    <!-- ============= Hazelcast Definitions =============
+
+    USED FOR LOCAL INSTANCE, REMOVED FOR EC2 CLUSTERING
+
+    <hazel:hazelcast id="instance">
+        <hazel:config>
+            <hazel:group name="dev" password="dev" />
+            <hazel:properties>
+                <hazel:property name="hazelcast.merge.first.run.delay.seconds">5</hazel:property>
+                <hazel:property name="hazelcast.merge.next.run.delay.seconds">5</hazel:property>
+            </hazel:properties>
+
+            <hazel:network port="5701" port-auto-increment="false">
+                <hazel:join>
+                    <hazel:multicast enabled="true" />
+                </hazel:join>
+            </hazel:network>
+        </hazel:config>
+    </hazel:hazelcast>
+
+     hazelcast map to store statues categorized by hashtag
+    <hazel:map instance-ref="instance" id="hashtagMap" name="hashtagMap" />
+
+     hazelcast map to store statues categorized by user
+    <hazel:map instance-ref="instance" id="userMap" name="userMap" />
+
+    -->
+
+    <bean name="hazelcastGroupConfig" class="com.hazelcast.config.GroupConfig">
+        <property name="name" value="${hazelcast.group.name}"/>
+        <property name="password" value="${hazelcast.group.password}"/>
+    </bean>
+
+    <bean name="hazelcastClientConfig" class="com.hazelcast.client.ClientConfig">
+        <property name="groupConfig" ref="hazelcastGroupConfig"/>
+        <property name="addresses">
+            <list>
+                <value>${hazelcast.cluster.address}</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- ============= RabbitMQ Definitions ============= -->
+
+    <rabbit:connection-factory id="connectionFactory" host="${rabbit.host}"
+                               username="${rabbit.userName}" password="${rabbit.password}"/>
+    <rabbit:template id="amqpTemplate" connection-factory="connectionFactory"/>
+    <rabbit:admin connection-factory="connectionFactory"/>
+
+    <rabbit:queue name="${rabbit.queues.twitter.stream.status}" durable="true"/>
+    <rabbit:queue name="${rabbit.queues.twitter.stream.delete}" durable="true"/>
+    <rabbit:queue name="${rabbit.queues.twitter.stream.scrub}" durable="true"/>
+
+    <rabbit:listener-container concurrency="75" connection-factory="connectionFactory" error-handler="amqpErrorHandler">
+        <rabbit:listener queue-names="${rabbit.queues.twitter.stream.status}" ref="statusMessageHandler"
+                         method="handle"/>
+    </rabbit:listener-container>
+
+    <rabbit:listener-container concurrency="50" connection-factory="connectionFactory" error-handler="amqpErrorHandler">
+        <rabbit:listener queue-names="${rabbit.queues.twitter.stream.delete}" ref="deleteMessageHandler"
+                         method="handle"/>
+    </rabbit:listener-container>
+
+    <!-- ============= Twitter Dependency Definitions ============= -->
+
+    <bean name="twitterFactory" class="twitter4j.TwitterFactory"/>
+
+    <!-- no annotation support for lookup method yet -->
+    <bean name="sessionFactory" class="jary.drools.factory.SessionFactory">
+        <lookup-method name="getSessionMediator" bean="sessionMediator"/>
+    </bean>
+</beans>
