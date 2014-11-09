@@ -3,17 +3,12 @@ package jary.drools;
 import org.drools.runtime.StatefulKnowledgeSession;
 import org.drools.runtime.rule.FactHandle;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
  * @author <a href='mailto:jeremy.ary@gmail.com'>jary</a>
  */
 @Component
-@Scope(BeanDefinition.SCOPE_PROTOTYPE)
-@Lazy
 public class SessionMediator {
 
     /**

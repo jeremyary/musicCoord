@@ -1,14 +1,70 @@
 package jary.drools
 
+import jary.drools.model.AdjustTestState
 import jary.drools.model.DanceEvent
+import jary.drools.model.Interval
 import jary.drools.model.SongAdjustEvent
 import jary.drools.model.SongAnalysisEvent
 
 global jary.drools.RuleDelegate delegate
 
-rule "dance input received"
+dialect "mvel"
+
+rule "next beat greater than interval with variation"
 when
-    DanceEvent (  )
+    $i : Interval ( $int : interval, $vary : variation )
+    $d1 : DanceEvent (  )
+    $d2 : DanceEvent ( this != $d1, (timestamp > ($d1.timestamp + $int) + $vary
+                                 &&  timestamp > ($d1.timestamp + $int) - $vary) )
 then
-    delegate.handleTrend($user);
+    System.out.println("next beat greater than last");
+    retract( $d1 );
+    retract( $d2 );
 end
+
+rule "next beat lesser than interval with variation"
+when
+    $i : Interval ( $int : interval, $vary : variation )
+    $d1 : DanceEvent (  )
+    $d2 : DanceEvent ( this != $d1, (timestamp < ($d1.timestamp + $int) + $vary
+                                 &&  timestamp < ($d1.timestamp + $int) - $vary) )
+then
+    System.out.println("next beat lesser than last");
+    retract( $d1 );
+    retract( $d2 );
+end
+
+rule "next beat negligible change"
+when
+    $i : Interval ( $int : interval, $vary : variation )
+    $d1 : DanceEvent (  )
+    $d2 : DanceEvent ( this != $d1, (timestamp <= ($d1.timestamp + $int) + $vary
+                                 &&  timestamp >= ($d1.timestamp + $int) - $vary) )
+then
+    System.out.println("next beat negligible");
+    retract( $d1 );
+    retract( $d2 );
+end
+
+rule "toggle speed test event - speed up"
+    timer (int: 5s)
+when
+    $state : AdjustTestState ( !isFast )
+then
+    delegate.dispatchAdjustment(new SongAdjustEvent("fooTitle", System.currentTimeMillis(), 1000L, 0.8));
+    modify( $state ){ setIsFast(true) };
+end
+
+rule "toggle speed test event - slow down"
+    timer (int: 5s)
+when
+    $state : AdjustTestState ( isFast )
+then
+    delegate.dispatchAdjustment(new SongAdjustEvent("fooTitle", System.currentTimeMillis(), 1000L, 0.8));
+    modify( $state ){ setIsFast(false) };
+end
+
+
+
+
+//TODO: divide by 2 (offset * 2) b/c they're dancing on half beats
