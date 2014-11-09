@@ -51,7 +51,7 @@ rule "toggle speed test event - speed up"
 when
     $state : AdjustTestState ( !isFast )
 then
-    delegate.dispatchAdjustment(new SongAdjustEvent("fooTitle", System.currentTimeMillis(), 1000L, 0.8));
+    delegate.dispatchAdjustment(new SongAdjustEvent("fooTitle", System.currentTimeMillis(), 1000L, 1.5));
     modify( $state ){ setIsFast(true) };
 end
 
@@ -60,7 +60,7 @@ rule "toggle speed test event - slow down"
 when
     $state : AdjustTestState ( isFast )
 then
-    delegate.dispatchAdjustment(new SongAdjustEvent("fooTitle", System.currentTimeMillis(), 1000L, 0.8));
+    delegate.dispatchAdjustment(new SongAdjustEvent("fooTitle", System.currentTimeMillis(), 1000L, 0.5));
     modify( $state ){ setIsFast(false) };
 end
 

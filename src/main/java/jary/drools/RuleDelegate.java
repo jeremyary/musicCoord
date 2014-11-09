@@ -59,8 +59,8 @@ public class RuleDelegate {
     public void init() {
 
         poolConfig = new JedisPoolConfig();
-//        jedisPool = new JedisPool(poolConfig, "172.31.253.53", 6379, 0);
-        jedisPool = new JedisPool(poolConfig, "localhost", 6379, 0);
+        jedisPool = new JedisPool(poolConfig, "172.31.253.53", 6379, 0);
+//        jedisPool = new JedisPool(poolConfig, "localhost", 6379, 0);
         subscriber = jedisPool.getResource();
         publisher = jedisPool.getResource();
 
@@ -151,19 +151,16 @@ public class RuleDelegate {
             }
         };
 
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    log.debug("STARTING SUBSCRIBE");
-                    Jedis jedis = jedisPool.getResource();
-                    jedis.subscribe(jedisPubSub, "dance-beat");
-                    jedis.subscribe(jedisPubSub, "song-analysis");
-                    jedis.quit();
-                } catch (Exception e) {
-                    log.error(">>> OH NOES Sub - " + e.toString());
-                    e.printStackTrace();
-                }
+        executor.execute(() -> {
+            try {
+                log.debug("STARTING SUBSCRIBE");
+                Jedis jedis = jedisPool.getResource();
+                jedis.subscribe(jedisPubSub, "dance-beat");
+                jedis.subscribe(jedisPubSub, "song-analysis");
+                jedis.quit();
+            } catch (Exception e) {
+                log.error(">>> OH NOES Sub - " + e.toString());
+                e.printStackTrace();
             }
         });
     }
