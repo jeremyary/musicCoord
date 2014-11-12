@@ -1,49 +1,37 @@
 package jary.drools
 
-import jary.drools.model.AdjustTestState
-import jary.drools.model.DanceEvent
-import jary.drools.model.Interval
-import jary.drools.model.SongAdjustEvent
-import jary.drools.model.SongAnalysisEvent
+import jary.drools.model.AdjustTestState;
+import jary.drools.model.DanceEvent;
+import jary.drools.model.DanceTrendDown;
+import jary.drools.model.DanceTrendUp;
+import jary.drools.model.Interval;
+import jary.drools.model.SongAdjustEvent;
+import jary.drools.model.SongAnalysisEvent;
+import java.util.List;
+import java.util.ArrayList;
 
-global jary.drools.RuleDelegate delegate
+global jary.drools.RuleDelegate delegate;
 
 dialect "mvel"
 
-rule "next beat greater than interval with variation"
+rule "insert interval N second marker"
+    timer(int: 4s)
 when
-    $i : Interval ( $int : interval, $vary : variation )
-    $d1 : DanceEvent (  )
-    $d2 : DanceEvent ( this != $d1, (timestamp > ($d1.timestamp + $int) + $vary
-                                 &&  timestamp > ($d1.timestamp + $int) - $vary) )
+    $i : Interval ( !expired )
 then
-    System.out.println("next beat greater than last");
-    retract( $d1 );
-    retract( $d2 );
+    System.out.println("interval timer triggered");
+    modify( $i ) { setExpired(true) };
 end
 
-rule "next beat lesser than interval with variation"
+rule "when timer expires, take measurement"
 when
-    $i : Interval ( $int : interval, $vary : variation )
-    $d1 : DanceEvent (  )
-    $d2 : DanceEvent ( this != $d1, (timestamp < ($d1.timestamp + $int) + $vary
-                                 &&  timestamp < ($d1.timestamp + $int) - $vary) )
+    $i : Interval ( expired )
+    $sa : SongAnalysisEvent (  )
+    $events : List (  ) from collect ( DanceEvent( ) )
 then
-    System.out.println("next beat lesser than last");
-    retract( $d1 );
-    retract( $d2 );
-end
-
-rule "next beat negligible change"
-when
-    $i : Interval ( $int : interval, $vary : variation )
-    $d1 : DanceEvent (  )
-    $d2 : DanceEvent ( this != $d1, (timestamp <= ($d1.timestamp + $int) + $vary
-                                 &&  timestamp >= ($d1.timestamp + $int) - $vary) )
-then
-    System.out.println("next beat negligible");
-    retract( $d1 );
-    retract( $d2 );
+    System.out.println("Taking calculation...");
+    modify( $i ) { setExpired(false) };
+    delegate.calculateAdjustment($sa, $events, 4);
 end
 
 rule "toggle speed test event - speed up"
@@ -51,6 +39,7 @@ rule "toggle speed test event - speed up"
 when
     $state : AdjustTestState ( !isFast )
 then
+    System.out.println("SENDING SPEED UP");
     delegate.dispatchAdjustment(new SongAdjustEvent("fooTitle", System.currentTimeMillis(), 1000L, 1.5));
     modify( $state ){ setIsFast(true) };
 end
@@ -60,7 +49,8 @@ rule "toggle speed test event - slow down"
 when
     $state : AdjustTestState ( isFast )
 then
-    delegate.dispatchAdjustment(new SongAdjustEvent("fooTitle", System.currentTimeMillis(), 1000L, 0.5));
+    System.out.println("SENDING SLOW DOWN");
+    delegate.dispatchAdjustment(new SongAdjustEvent("fooTitle", System.currentTimeMillis(), 1000L, 1.5));
     modify( $state ){ setIsFast(false) };
 end
 

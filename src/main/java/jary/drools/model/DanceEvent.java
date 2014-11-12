@@ -8,35 +8,40 @@ public class DanceEvent {
 
     private Long timestamp;
 
-    private String type;
-
-    private Integer[] position;
-
     private Integer intensity;
+
+    private String type;
 
     public DanceEvent() {
     }
 
-    public DanceEvent(final Long timestamp, final String type, final Integer[] position, final Integer intensity) {
+    public DanceEvent(Long timestamp, Integer intensity, String type) {
         this.timestamp = timestamp;
-        this.type = type;
-        this.position = position;
         this.intensity = intensity;
+        this.type = type;
     }
 
     public Long getTimestamp() {
         return timestamp;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public Integer[] getPosition() {
-        return position;
+    public void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
     }
 
     public Integer getIntensity() {
         return intensity;
+    }
+
+    public void setIntensity(Integer intensity) {
+        this.intensity = intensity;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

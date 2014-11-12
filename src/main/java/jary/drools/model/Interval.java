@@ -6,29 +6,25 @@ package jary.drools.model;
  */
 public class Interval {
 
-    private Integer interval;
+    private Long timestamp;
 
-    private Integer variation;
+    private Boolean expired;
 
-    public Interval(Integer interval) {
-        this.interval = interval;
-        this.variation = 500;
+    public Interval(Boolean expired) {
+        this.timestamp = System.currentTimeMillis();
+        this.expired = expired;
     }
 
-    public Integer getInterval() {
-        return interval;
+    public Long getTimestamp() {
+        return timestamp;
     }
 
-    public void setInterval(Integer interval) {
-        this.interval = interval;
+    public Boolean getExpired() {
+        return expired;
     }
 
-    public Integer getVariation() {
-        return variation;
-    }
-
-    public void setVariation(Integer variation) {
-        this.variation = variation;
+    public void setExpired(Boolean expired) {
+        this.expired = expired;
     }
 }
 
